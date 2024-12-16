@@ -25,7 +25,7 @@ char initialiser_grille(char grille[20][20]) {
 }
 
 char position_serpent(char grille[20][20], int taille_serpent, int direction, int x, int y) {
-    // 1 = haut, 2 = droite, 3 = bas, 4 = gauche
+    // 1 = haut, 2 = droite, 3 = bas, 4 = gaucheeeeeeeeeeeeeeeee
     if (direction == 1) {
         for (int i = 0; i < taille_serpent; i++) {
             grille[x - i][y] = 'O';
