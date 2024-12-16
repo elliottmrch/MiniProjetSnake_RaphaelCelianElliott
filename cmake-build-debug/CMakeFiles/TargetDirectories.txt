@@ -1,0 +1,3 @@
+C:/Users/ellio/OneDrive - JUNIA Grande école d'ingénieurs/Bureau/JUNIA/CIR1/Programmation/C/MiniProjetSnake/cmake-build-debug/CMakeFiles/MiniProjetSnake.dir
+C:/Users/ellio/OneDrive - JUNIA Grande école d'ingénieurs/Bureau/JUNIA/CIR1/Programmation/C/MiniProjetSnake/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/ellio/OneDrive - JUNIA Grande école d'ingénieurs/Bureau/JUNIA/CIR1/Programmation/C/MiniProjetSnake/cmake-build-debug/CMakeFiles/rebuild_cache.dir
