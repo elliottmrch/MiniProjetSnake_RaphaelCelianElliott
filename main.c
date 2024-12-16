@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <windows.h>
 #include <conio.h>
 
 void afficher_grille(char grille[20][20]) {
@@ -15,58 +16,68 @@ void afficher_grille(char grille[20][20]) {
     printf("+----------------------------------------+\n");
 }
 
-char initialiser_grille(char grille[20][20]) {
+void initialiser_grille(char grille[20][20]) {
     for (int i = 0; i < 20; i++) {
         for (int j = 0; j < 20; j++) {
             grille[i][j] = ' ';
         }
     }
-    return grille;
 }
 
-char position_serpent(char grille[20][20], int taille_serpent, int direction, int x, int y) {
-    // 1 = haut, 2 = droite, 3 = bas, 4 = gaucheeeeeeeeeeeeeeeee
-    if (direction == 1) {
+void position_serpent(char grille[20][20], int taille_serpent, int direction, int *x, int *y) {
+    if (direction == 1) {  // Haut
         for (int i = 0; i < taille_serpent; i++) {
-            grille[x - i][y] = 'O';
+            grille[*x - i][*y] = 'O';
         }
+        (*x)--; 
     }
-    else if (direction == 2) {
+    else if (direction == 2) {  // Droite
         for (int i = 0; i < taille_serpent; i++) {
-            grille[x][y + i] = 'O';
+            grille[*x][*y + i] = 'O';
         }
+        (*y)++; 
     }
-    else if (direction == 3) {
+    else if (direction == 3) {  // Bas
         for (int i = 0; i < taille_serpent; i++) {
-            grille[x + i][y] = 'O';
+            grille[*x + i][*y] = 'O';
         }
+        (*x)++;
     }
-    else if (direction == 4) {
+    else if (direction == 4) {  // Gauche
         for (int i = 0; i < taille_serpent; i++) {
-            grille[x][y - i] = 'O';
+            grille[*x][*y - i] = 'O';
         }
+        (*y)--; 
     }
-    return grille;
 }
 
 int direction_serpent(int direction) {
-    char touche = _getch();
+    if (_kbhit()) {
+        char touche = _getch();
 
-    switch (touche) {
-        case ('z'):
-            direction = 1;
-        break;
-        case 'd':
-            direction = 2;
-        break;
-        case 's':
-            direction = 3;
-        break;
-        case 'q':
-            direction = 4;
-        break;
+        switch (touche) {
+            case 'z': case 72:
+                if (direction != 3) {
+                    direction = 1;
+                }
+                break;
+            case 'd': case 77:
+                if (direction != 4) {
+                    direction = 2;
+                }
+                break;
+            case 's': case 80:
+                if (direction != 1) {
+                    direction = 3;
+                }
+                break;
+            case 'q': case 75:
+                if (direction != 2) {
+                    direction = 4;
+                }
+                break;
+        }
     }
-
     return direction;
 }
 
@@ -74,11 +85,20 @@ int main() {
     char grille[20][20];
     int taille_serpent = 3;
     int direction = 2;
+    int x = 0;
+    int y = 0;
     initialiser_grille(grille);
-
+    position_serpent(grille, taille_serpent, direction, &x, &y);
+    afficher_grille(grille);
+    
     while (1) {
-        position_serpent(grille, taille_serpent, direction, 0, 0);
+        direction = direction_serpent(direction);
+        initialiser_grille(grille);
+        position_serpent(grille, taille_serpent, direction, &x, &y);
         afficher_grille(grille);
+        Sleep(700);
+        system("cls");
     }
+
     return 0;
 }
