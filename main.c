@@ -4,74 +4,77 @@
 #include <windows.h>
 #include <conio.h>
 
-void afficher_grille(char grille[20][20]) {
-    printf("+----------------------------------------+\n");
-    for (int i = 0; i < 20; i++) {
+void afficher_grille(char grille[][20], int taille) {
+    printf("+");
+    for (int i = 0; i < taille * 2; i++) {
+        printf("-");
+    }
+    printf("+\n");
+
+    for (int i = 0; i < taille; i++) {
         printf("|");
-        for (int j = 0; j < 20; j++) {
-            printf(" %c", grille[i][j]);
+        for (int j = 0; j < taille; j++) {
+            printf("%c ", grille[i][j]);
         }
         printf("|\n");
     }
-    printf("+----------------------------------------+\n");
+
+    printf("+");
+    for (int i = 0; i < taille * 2; i++) {
+        printf("-");
+    }
+    printf("+\n");
 }
 
-void initialiser_grille(char grille[20][20]) {
-    for (int i = 0; i < 20; i++) {
-        for (int j = 0; j < 20; j++) {
+void initialiser_grille(char grille[][20], int taille) {
+    for (int i = 0; i < taille; i++) {
+        for (int j = 0; j < taille; j++) {
             grille[i][j] = ' ';
         }
     }
 }
 
-void position_serpent(char grille[20][20], int taille_serpent, int direction, int *x, int *y) {
-    if (direction == 1) {  // Haut
-        for (int i = 0; i < taille_serpent; i++) {
-            grille[*x - i][*y] = 'O';
+int case_occupee_par_serpent(int serpent[][2], int taille_serpent, int x, int y) {
+    for (int i = 0; i < taille_serpent; i++) {
+        if (serpent[i][0] == x && serpent[i][1] == y) {
+            return 1;
         }
-        (*x)--; 
     }
-    else if (direction == 2) {  // Droite
-        for (int i = 0; i < taille_serpent; i++) {
-            grille[*x][*y + i] = 'O';
-        }
-        (*y)++; 
-    }
-    else if (direction == 3) {  // Bas
-        for (int i = 0; i < taille_serpent; i++) {
-            grille[*x + i][*y] = 'O';
-        }
-        (*x)++;
-    }
-    else if (direction == 4) {  // Gauche
-        for (int i = 0; i < taille_serpent; i++) {
-            grille[*x][*y - i] = 'O';
-        }
-        (*y)--; 
-    }
+    return 0;
+}
+
+void ajout_nourriture(char grille[][20], int serpent[][2], int taille_serpent, int *pomme_x, int *pomme_y, int taille) {
+    int x, y;
+    do {
+        x = rand() % taille;
+        y = rand() % taille;
+    } while (case_occupee_par_serpent(serpent, taille_serpent, x, y));
+
+    *pomme_x = x;
+    *pomme_y = y;
+    grille[x][y] = '@';
 }
 
 int direction_serpent(int direction) {
     if (_kbhit()) {
         char touche = _getch();
-
         switch (touche) {
-            case 'z': case 72:
+            case 'z': case 72: 
                 if (direction != 3) {
                     direction = 1;
                 }
                 break;
-            case 'd': case 77:
+            case 'd': case 77: 
                 if (direction != 4) {
                     direction = 2;
                 }
                 break;
-            case 's': case 80:
+            case 's': case 80: 
                 if (direction != 1) {
                     direction = 3;
                 }
                 break;
-            case 'q': case 75:
+            case 'q': case 75: 
                 if (direction != 2) {
                     direction = 4;
                 }
@@ -81,22 +84,91 @@ int direction_serpent(int direction) {
     return direction;
 }
 
+void mise_a_jour_serpent(int serpent[][2], int taille_serpent, int direction, int *derniere_queue_x, int *derniere_queue_y) {
+    *derniere_queue_x = serpent[taille_serpent-1][0];
+    *derniere_queue_y = serpent[taille_serpent-1][1];
+    
+    for (int i = taille_serpent - 1; i > 0; i--) {
+        serpent[i][0] = serpent[i - 1][0];
+        serpent[i][1] = serpent[i - 1][1];
+    }
+
+    switch (direction) {
+        case 1: 
+            serpent[0][0]--;
+            break;
+        case 2: 
+            serpent[0][1]++;
+            break;
+        case 3: 
+            serpent[0][0]++;
+            break;
+        case 4: 
+            serpent[0][1]--;
+            break;
+    }
+}
+
+void initialiser_serpent(int serpent[][2], int taille) {
+    serpent[0][0] = taille / 2;
+    serpent[0][1] = taille / 2;
+    serpent[1][0] = taille / 2;
+    serpent[1][1] = taille / 2 - 1;
+    serpent[2][0] = taille / 2;
+    serpent[2][1] = taille / 2 - 2;
+}
+
 int main() {
+    int taille = 20;
     char grille[20][20];
+    int serpent[400][2];
     int taille_serpent = 3;
     int direction = 2;
-    int x = 0;
-    int y = 0;
-    initialiser_grille(grille);
-    position_serpent(grille, taille_serpent, direction, &x, &y);
-    afficher_grille(grille);
-    
+    int pomme_x, pomme_y;
+    int score = 0;
+    int derniere_queue_x, derniere_queue_y;
+
+    srand(time(NULL));
+
+    initialiser_serpent(serpent, taille);
+    initialiser_grille(grille, taille);
+    ajout_nourriture(grille, serpent, taille_serpent, &pomme_x, &pomme_y, taille);
+
     while (1) {
         direction = direction_serpent(direction);
-        initialiser_grille(grille);
-        position_serpent(grille, taille_serpent, direction, &x, &y);
-        afficher_grille(grille);
-        Sleep(700);
+        mise_a_jour_serpent(serpent, taille_serpent, direction, &derniere_queue_x, &derniere_queue_y);
+
+        if (serpent[0][0] < 0 || serpent[0][0] >= taille || serpent[0][1] < 0 || serpent[0][1] >= taille) {
+            printf("Game Over! Collision avec le mur.\nScore final: %d\n", score);
+            break;
+        }
+
+        for (int i = 1; i < taille_serpent; i++) {
+            if (serpent[0][0] == serpent[i][0] && serpent[0][1] == serpent[i][1]) {
+                printf("Game Over! Collision avec le corps.\nScore final: %d\n", score);
+                return 0;
+            }
+        }
+
+        if (serpent[0][0] == pomme_x && serpent[0][1] == pomme_y) {
+            serpent[taille_serpent][0] = derniere_queue_x;
+            serpent[taille_serpent][1] = derniere_queue_y;
+            taille_serpent++;
+            score += 1;
+            ajout_nourriture(grille, serpent, taille_serpent, &pomme_x, &pomme_y, taille);
+        }
+
+        initialiser_grille(grille, taille);
+        grille[pomme_x][pomme_y] = '@';
+        
+        for (int i = 0; i < taille_serpent; i++) {
+            grille[serpent[i][0]][serpent[i][1]] = 'O';
+        }
+
+        printf("Score: %d\n", score);
+        afficher_grille(grille, taille);
+
+        Sleep(300);
         system("cls");
     }
 
